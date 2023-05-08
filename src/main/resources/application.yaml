@@ -1,0 +1,6 @@
+server:
+  port: 8081
+
+loggerator:
+  hostname: localhost
+  port: 8080

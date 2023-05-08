@@ -1,0 +1,25 @@
+version: '2.0'
+
+services:
+  loggerator:
+    container_name: loggerator
+    image: gcr.io/hiring-278615/loggerator
+    ports:
+      - "8080:8080"
+    command:  --count 500 --seed 10 # If this is not set then it will take the default value of count = 800000 and seed = 1
+  log-processor-service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: log-processor-service
+    image: log-processor-service
+    ports:
+      - "26976:26976"
+      - "8081:8081"
+    links:
+      - loggerator:loggerator
+    entrypoint:
+      - java
+      - -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=26976
+      - -jar
+      - target/log-processor-service.jar
