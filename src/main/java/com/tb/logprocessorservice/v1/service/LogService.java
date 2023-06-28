@@ -18,43 +18,46 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class LogService {
-  private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MMM/yyyy kk:mm:ss Z", Locale.US);
+  private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MMM/yyyy kk:mm:ss Z");
   // Log Input format:
   // 23.59.50.157 - annstewart [09/Jul/2000 04:56:38 +0000] "GET /followers/178 HTTP/1.0" 200 505
   private static String LOG_INPUT_REGEX = "^(\\S+) (\\S+) (\\S+) \\[(.+)\\] \"(.+)\" (\\S+) (\\S+)$";
 
-  @Value("${loggerator.hostname}")
+  @Value("${loggerator.host}")
   String hostname;
 
   @Value("${loggerator.port}")
   int port;
 
-  public List<LogEntity> processLogs(List<HttpStatus> codes, List<String> methods, List<String> users) {
+  public List<String> processLogs(List<HttpStatus> codes, List<String> methods, List<String> users) throws UnknownHostException, IOException {
     List<LogEntity> logs = new ArrayList<>();
-    LogEntity logEntity;
     String sData;
+    LogEntity log;
     try (Socket socket = new Socket(hostname, port)) {
       InputStream input = socket.getInputStream();
       BufferedReader reader = new BufferedReader(new InputStreamReader(input));
       do {
         sData = reader.readLine();
-        logEntity = sData != null ? processLog(sData, codes, methods, users) : null;
-        if (logEntity != null) {
-          logs.add(logEntity);
+        log = getFilteredLogEntity(sData, codes, methods, users);
+        if(log != null) {
+          logs.add(log);
         }
       } while (sData != null);
     } catch (UnknownHostException ex) {
       System.err.println("Server not found: " + ex.getMessage());
+      throw ex;
     } catch (IOException ex) {
-      System.err.println("I/O error: " + ex);
+      System.err.println("I/O error: " + ex.getMessage());
+      throw ex;
     }
-    return logs;
+    return logs.stream().sorted((x,y) -> y.getDate().compareTo(x.getDate())).map(LogEntity::toString).collect(Collectors.toList());
   }
 
-  public LogEntity processLog(String data, List<HttpStatus> codes, List<String> methods, List<String> users) {
+  public LogEntity getFilteredLogEntity(String data, List<HttpStatus> codes, List<String> methods, List<String> users) {
     if (data != null && data.length() > 0) {
       LogEntity logEntity = mapToEntity(data);
       if(applyFilters(logEntity, codes, methods, users)) {
@@ -83,6 +86,7 @@ public class LogService {
       Pattern pattern = Pattern.compile(LOG_INPUT_REGEX);
       Matcher matcher = pattern.matcher(data);
       if (matcher.matches()) {
+        logEntity.setRawData(data);
         logEntity.setRemotehost(matcher.group(1));
         logEntity.setRfc931(matcher.group(2));
         logEntity.setAuthuser(matcher.group(3));
@@ -95,8 +99,11 @@ public class LogService {
     return logEntity;
   }
 
-  LocalDateTime getLogDate(String logText) {
-    return LocalDateTime.parse(logText, formatter);
+  LocalDateTime getLogDate(String logDateText) {
+    return LocalDateTime.parse(logDateText, formatter);
   }
 
+  String getLogDateText(LocalDateTime logDate) {
+    return logDate.format(formatter);
+  }
 }
