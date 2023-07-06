@@ -35,12 +35,11 @@ public class LogService {
       return reader
           .lines()
           .parallel()
-          .map(x -> logMapper.toEntity(x))
+          .map(logMapper::toEntity)
           .filter(x -> x != null && applyFilters(x, codes, methods, users))
           .sorted((x,y) -> y.getDate().compareTo(x.getDate()))
           .map(logMapper::toLog)
           .collect(Collectors.toList());
-      // return logs.stream().sorted((x,y) -> y.getDate().compareTo(x.getDate())).map(logMapper::toLog).collect(Collectors.toList());
     } catch (UnknownHostException ex) {
       System.err.println("Server not found: " + ex.getMessage());
       throw ex;
