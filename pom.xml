@@ -16,6 +16,9 @@
     <properties>
         <java.version>11</java.version>
         <spring-boot.version>2.3.2.RELEASE</spring-boot.version>
+        <spring-fox.version>3.0.0</spring-fox.version>
+        <!-- https://mvnrepository.com/artifact/org.spockframework/spock-core -->
+        <spock-spring.version>2.3-groovy-4.0</spock-spring.version>
     </properties>
     <dependencies>
         <dependency>
@@ -30,6 +33,25 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+            <version>${spock-spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-spring</artifactId>
+            <version>${spock-spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.groovy/groovy-all -->
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>4.0.4</version>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.26</version>
@@ -38,29 +60,102 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-boot-starter</artifactId>
-            <version>3.0.0</version>
+            <version>${spring-fox.version}</version>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
-            <version>3.0.0</version>
+            <version>${spring-fox.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-data-rest</artifactId>-->
-<!--            <version>3.0.0</version>-->
-<!--        </dependency>-->
     </dependencies>
-<!--    <build>-->
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-<!--    </build>-->
     <build>
         <plugins>
+                <plugin>
+                    <groupId>org.codehaus.gmavenplus</groupId>
+                    <artifactId>gmavenplus-plugin</artifactId>
+                    <version>1.9.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>addTestSources</goal>
+                                <goal>compileTests</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                    <configuration>
+                        <source>11</source>
+                        <target>11</target>
+                    </configuration>
+                </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Spec.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>3.11.0</version>-->
+<!--                <configuration>-->
+<!--                    <compilerId>groovy-eclipse-compiler</compilerId>-->
+<!--                    <source>11</source>-->
+<!--                    <target>11</target>-->
+<!--&lt;!&ndash;                    <annotationProcessorPaths>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <path>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <groupId>org.projectlombok</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <artifactId>lombok</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <version>1.18.26</version>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </path>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </annotationProcessorPaths>&ndash;&gt;-->
+<!--                    <includes>-->
+<!--                        <include>**/*.groovy</include>-->
+<!--                        <include>**/*.java</include>-->
+<!--                    </includes>-->
+<!--                    <testIncludes>-->
+<!--                        <testInclude>**/*.groovy</testInclude>-->
+<!--                        <testInclude>**/*.java</testInclude>-->
+<!--                    </testIncludes>-->
+<!--                    <compilerArguments>-->
+<!--                        &lt;!&ndash; consult Lombok docs to confirm agent class name for your version &ndash;&gt;-->
+<!--                        <javaAgentClass>lombok.launch.Agent</javaAgentClass>-->
+<!--                    </compilerArguments>-->
+<!--                    <fork>true</fork>-->
+<!--                </configuration>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.codehaus.groovy</groupId>-->
+<!--                        <artifactId>groovy-eclipse-compiler</artifactId>-->
+<!--                        <version>3.6.0-03</version>-->
+<!--                        <exclusions>-->
+<!--                            <exclusion>-->
+<!--                                <groupId>org.codehaus.groovy</groupId>-->
+<!--                                <artifactId>groovy-eclipse-batch</artifactId>-->
+<!--                            </exclusion>-->
+<!--                        </exclusions>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.codehaus.groovy</groupId>-->
+<!--                        <artifactId>groovy-eclipse-batch</artifactId>-->
+<!--                        <version>3.0.8-01</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.projectlombok</groupId>-->
+<!--                        <artifactId>lombok</artifactId>-->
+<!--                        <version>1.18.26</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--            </plugin>-->
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.3.0</version>
